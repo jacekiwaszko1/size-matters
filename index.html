@@ -4,12 +4,15 @@
     <meta charset="utf-8">
     <title>Size matters</title>
     <link rel="stylesheet" href="size-matters.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
     <script type="text/javascript" src="size-matters.js"></script>
   </head>
   <body>
-    <mojjson class="hidden">
-      <embed  src="data/count-dimensions-within-dates.json">
-    </mojjson>
+    <div class="hidden">
+      <div id="count_dimensions" class="storage">
+
+      </div>
+    </div>
     <div id="menu">
     <div id="title" class="title">Size matters</div>
     <div class="navbar">
@@ -26,9 +29,76 @@
       </div>
       <div id="queries" class="content-tab hidden">
         <h1>Queries</h1>
+        <details id="count_dimensions_query">
+          <summary>Query counting the occurances of particular dimensions</summary>
+          <pre><code id="count_dimensions_code">
+@prefix
+select * where {
+  ?s ?p ?o .
+} limit 100
+          </code></pre>
+        </details>
       </div>
       <div id="charts" class="content-tab hidden">
         <h1>Charts</h1>
+          <div id="count_dimensions_div" class="chart">
+            <h2>Sizes of 16th-century manuscripts and prints</h2>
+            <p>
+              The chart below presents the distribution of the sizes
+              of manuscripts and prints in 16<sup>th</sup> century,
+              based on the RISM data, fetched with use of SPARQL query
+              on RDF set published by RISM Digital Center
+              (see <strong>QUERIES</strong> ->
+              <strong>Query counting the occurances of particular dimensions</strong>).
+              Whenever it was possible, dimensions were separated into height and width,
+              converted to centimeters and rounded to integers.
+              Based on height and width proportions, orientation was established.
+              In the chart, sources in landscape orientation are presented
+              in <span style="color: gold;"><strong>yellow</strong></span>,
+              sources in portrait orientation are <span style="color: green;"><strong>green</strong></span>.
+              If orientation was unclear, the bar was colored <span style="color: grey"><strong>grey</strong></span>.
+              Settings below the chart allow to filter graphic result by number of occurences and orientation,
+              as well as sort the results by label (alphabetically), or by the number of occurences (in descending order).
+              <strong>TOTAL</strong> parameter counts all defined sizes displayed on the chart.
+
+            </p>
+            <div style='max-height: 500px' id="chart-div" class="">
+              <canvas style='max-width: 1200px;' id="count_dimensions_chart"></canvas>
+
+            </div>
+            <div id="count_dimensions_settings" class="chart-settings">
+              <form class="chartsettings-form" action="" method="post" onchange="activateTab('charts', 'nav-charts')">
+                  <p class="label">Sort by:</p>
+                  <input type="radio" id="sortby-label" name="sortby" value="label" onchange="toggleChecked('sortby-label')" checked>
+                  <label for="sortby-label">label (default)</label>
+                  <input type="radio" id="sortby-count" name="sortby" value="count" onchange="toggleChecked('sortby-count')">
+                  <label for="sortby-count">count</label>
+                  <label for="min-count" class="label">Min. count:</label>
+                  <input type="text" id="min-count" name="min-count" value="3" placeholder="min. occurences" size="7">
+                  <p class='label'>Orientation:</p>
+                  <input type="checkbox" id="landscape" name="landscape" value="landscape" checked onchange="toggleChecked('landscape')" class="checkbox-count-dimensions-orientation">
+                  <label for="landscape">landscape</label>
+                  <input type="checkbox" id="portrait" name="portrait" value="portrait" checked onchange="toggleChecked('portrait')" class="checkbox-count-dimensions-orientation">
+                  <label for="portrait">portrait</label>
+                  <input type="checkbox" id="unknown" name="unknown" value="unknown" checked onchange="toggleChecked('unknown')" class="checkbox-count-dimensions-orientation">
+                  <label for="unknown">unknown</label>
+                  <p class='label'>Total: </p><p id="count-dimensions-counter"></p>
+                  <!--input type="submit" name="submitbutton" value="Submit"-->
+              </form>
+            </div>
+
+          </div>
+          <div id="count_orientations_div" class="chart">
+            <h2>Orientation of 16th-century manuscripts and prints</h2>
+            <p>
+              The piechart below presents the distribution of orientations in 16<sup>th</sup>-century
+              manuscripts and prints in three categories: <span style="color:gold"><strong>landscape</strong></span>,
+              <span style="color:green"><strong>portrait</strong></span>, and <span style="color:grey"><strong>undefined</strong></span>.
+            </p>
+            <div style='max-height: 300px' id="piechart-div" class="">
+              <canvas style='max-width: 1200px;' id="count_orientations_chart"></canvas>
+            </div>
+          </div>
       </div>
       <div id="about" class="content-tab hidden">
         <h1>About</h1>
