@@ -1,0 +1,14 @@
+# This request returns the list of all 16th century manuscripts
+# with given dimensions (in this case 15 x 20 cm).
+#
+
+PREFIX rism: <https://rism.online/api/v1#>
+select ?s ?date ?d where {
+	?s rism:hasPhysicalDimensions ?d .
+    ?s rism:hasDates/rism:earliestDate ?date .
+    filter (?date < 1600)
+    filter (?date > 1499)
+    filter not exists {?s rism:isPartOf ?p}
+    filter (regex(?d, "15,?[0-9]? x 20,?[0-9] cm"))
+}
+  order by ?date

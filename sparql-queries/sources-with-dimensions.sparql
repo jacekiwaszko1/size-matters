@@ -1,0 +1,12 @@
+# This query returns the list of all top-level RISM records
+# of 16th century manuscripts that have dimensions encoded.
+#
+
+PREFIX rism: <https://rism.online/api/v1#>
+select ?s ?d ?date where {
+	?s rism:hasPhysicalDimensions ?d .
+    ?s rism:hasDates/rism:earliestDate ?date .
+    filter (?date < 1600)
+    filter (?date > 1499)
+    filter not exists {?s rism:isPartOf ?p}
+}

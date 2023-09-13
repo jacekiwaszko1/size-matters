@@ -1,0 +1,14 @@
+# This request returns all the sizes of the 16th century manuscripts
+# catalogued in the RISM database with the counter, sorted by the
+# number of occurences in descending order.
+
+PREFIX rism: <https://rism.online/api/v1#>
+select ?d (count (?d) as ?count) where { 
+	?s rism:hasPhysicalDimensions ?d .
+    ?s rism:hasDates/rism:earliestDate ?date .
+    filter (?date < 1600)
+    filter (?date > 1499)
+    filter not exists {?s rism:isPartOf ?p}
+} 
+group by ?d
+order by desc (?count)

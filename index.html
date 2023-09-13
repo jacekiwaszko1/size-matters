@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" >
+  <head>
+    <meta charset="utf-8">
+    <title>Size matters</title>
+    <link rel="stylesheet" href="size-matters.css">
+    <script type="text/javascript" src="size-matters.js"></script>
+  </head>
+  <body>
+    <mojjson class="hidden">
+      <embed  src="data/count-dimensions-within-dates.json">
+    </mojjson>
+    <div id="menu">
+    <div id="title" class="title">Size matters</div>
+    <div class="navbar">
+
+      <div onclick="activateTab('search', 'nav-search')" id="nav-search" class="tab">Search</div>
+      <div onclick="activateTab('queries', 'nav-queries')" id="nav-queries" class="tab">Queries</div>
+      <div onclick="activateTab('charts', 'nav-charts')" id="nav-charts" class="tab">Charts</div>
+      <div onclick="activateTab('about', 'nav-about')" id="nav-about" class="tab">About</div>
+    </div>
+  </div>
+    <div class="content">
+      <div id="search" class="content-tab hidden">
+        <h1>Search</h1>
+      </div>
+      <div id="queries" class="content-tab hidden">
+        <h1>Queries</h1>
+      </div>
+      <div id="charts" class="content-tab hidden">
+        <h1>Charts</h1>
+      </div>
+      <div id="about" class="content-tab hidden">
+        <h1>About</h1>
+      </div>
+    </div>
+  </body>
+</html>
