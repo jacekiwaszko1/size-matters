@@ -52,7 +52,7 @@ button:hover {
   -moz-border-radius: 5px;
   border-radius: 5px;
   background-color: #e0c9a6;
-
+  margin-top: 15px;
 
 }
 
@@ -64,7 +64,7 @@ button:hover {
   background-color: #e0c9a6;
   flex: 0.3;
   font-weight: bold;
-  padding: 15px;
+  padding: 25px 15px 15px;
 
 }
 
@@ -86,13 +86,17 @@ button:hover {
   /*height: 60px;*/
   background-color: #e0c9a6;
   flex: 20%;
-  padding: 15px;
+  padding: 26px;
 
 }
 
 div.tab:hover {
   background-color: #b0a986;
 
+}
+
+img.logo {
+  margin-top: 20px;
 }
 
 .hidden {

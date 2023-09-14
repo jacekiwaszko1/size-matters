@@ -111,6 +111,7 @@ function resetSearch() {
       toggleChecked(cb.id);
     }
   }
+  searchIndex();
 }
 
 function htmlSpecialChars(text) {
@@ -439,7 +440,6 @@ function searchIndex() {
     document.getElementById('result-list').innerHTML = "";
     document.getElementById('search-result-count').innerHTML = "";
   } else {
-    let result_counter = 1;
     document.getElementById('search-result-count').innerHTML = "Number of search results: " + results.length;
     document.getElementById('result-list').innerHTML = "";
     let ol = document.createElement('ul');
@@ -447,13 +447,11 @@ function searchIndex() {
     for (var r of results) {
       let li = document.createElement('li');
       li.setAttribute('class', 'item');
-      li.innerHTML = result_counter + ". ";
       let mya = document.createElement('a');
       mya.setAttribute('href', r.id);
       mya.innerHTML = r.id;
       li.appendChild(mya);
       ol.appendChild(li);
-      result_counter += 1;
     }
     document.getElementById('result-list').appendChild(ol);
   }
