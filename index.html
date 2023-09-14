@@ -12,6 +12,9 @@
       <div id="count_dimensions" class="storage">
 
       </div>
+      <div id="sources-dimensions-index" class="storage" >
+
+      </div>
     </div>
     <div id="menu">
     <div id="title" class="title">Size matters</div>
@@ -26,6 +29,42 @@
     <div class="content">
       <div id="search" class="content-tab hidden">
         <h1>Search</h1>
+        <div id="search-form-div" class="search-form-div">
+          <h2>Specify search parameters:</h2>
+          <form id="search-form" class="" action="" method="post" onchange="searchIndex()">
+            <div class="searchform-line">
+              <label class="label" for="height-input">Height in cm:</label>
+              <input class="dimensions-input" id="height-input" type="text" name="h" value="" placeholder="eg. 13.7" size="7">
+              <label class="label" for="width-input">Width in cm:</label>
+              <input class="dimensions-input" id="width-input" type="text" name="w" value="" placeholder="eg. 21.3" size="7">
+              <label class="label" for="accuracy-input">Accuracy +/- :</label>
+              <input class="accuracy-input" id="accuracy-input" type="text" name="+-" value="" placeholder="eg. 0.4" size="7">
+            </div>
+            <div class="searchform-line">
+              <p class="label">Orientation:</p>
+              <input type="checkbox" id="search-landscape" name="search-landscape" value="landscape" checked onchange="toggleChecked('search-landscape')" class="checkbox-search-dimensions-orientation">
+              <label for="search-landscape">landscape</label>
+              <input type="checkbox" id="search-portrait" name="search-portrait" value="portrait" checked onchange="toggleChecked('search-portrait')" class="checkbox-search-dimensions-orientation">
+              <label for="search-portrait">portrait</label>
+              <input type="checkbox" id="search-unknown" name="search-unknown" value="unknown" checked onchange="toggleChecked('search-unknown')" class="checkbox-search-dimensions-orientation">
+              <label for="search-unknown">unknown</label>
+            </div>
+            <div class="searchform-line">
+              <label class="label" for="search-uniformed">Uniformed dimensions: </label>
+              <input type="text" id="search-uniformed" name="search-uniformed" value="" size="30" placeholder="eg. 15.4x20.7, in-8, in-4obl.">
+            </div>
+            <div class="searchform-line">
+              <button type='button' onclick="resetSearch()">Reset search parameters ⌫</button>
+            </div>
+          </form>
+
+        </div>
+        <div id="search-results">
+          <h3 id="search-result-count"></h3>
+          <div id="result-list">
+
+          </div>
+        </div>
       </div>
       <div id="queries" class="content-tab hidden">
         <h1>Queries</h1>

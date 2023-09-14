@@ -7,7 +7,7 @@ xhr.responseType = "json";
 xhr.onload = () => {
   if (xhr.readyState == 4 && xhr.status == 200) {
     const data = xhr.response;
-    console.log(data);
+    //console.log(data);
     count_dimensions_json = data;
     document.getElementById('count_dimensions').innerHTML = JSON.stringify(count_dimensions_json);
   } else {
@@ -26,7 +26,7 @@ xhr_count_dimensions_query.responseType = "text";
 xhr_count_dimensions_query.onload = () => {
   if (xhr_count_dimensions_query.readyState == 4 && xhr_count_dimensions_query.status == 200) {
     const data = xhr_count_dimensions_query.response;
-    console.log("data: ", data);
+    //console.log("data: ", data);
     count_dimensions_query = data;
     document.getElementById('count_dimensions_code').innerHTML = htmlSpecialChars(count_dimensions_query);
   } else {
@@ -35,11 +35,30 @@ xhr_count_dimensions_query.onload = () => {
 };
 //console.log(count_dimensions_query);
 
+//get index of sources with dimiensions
+let sources_dimensions_query;
+const xhr_sources_dimensions_query = new XMLHttpRequest();
+xhr_sources_dimensions_query.open("GET", "https://raw.githubusercontent.com/jacekiwaszko1/size-matters/main/data/sources-with-dimensions.json");
+xhr_sources_dimensions_query.send();
+xhr_sources_dimensions_query.responseType = "json";
+xhr_sources_dimensions_query.onload = () => {
+  if (xhr_sources_dimensions_query.readyState == 4 && xhr_sources_dimensions_query.status == 200) {
+    const data = xhr_sources_dimensions_query.response;
+    //console.log("data: ", data);
+    sources_dimensions_query = data;
+    document.getElementById('sources-dimensions-index').innerHTML = JSON.stringify(sources_dimensions_query);
+  } else {
+    console.log(`Error: ${xhr_sources_dimensions_query.status}`);
+  }
+};
+
+
 
 if ( window.history.replaceState ) {
   window.history.replaceState( null, null, window.location.href );
 }
 
+let search_index;
 
 function activateTab(tabname, navtab, from) {
   console.log(tabname);
@@ -60,12 +79,13 @@ function activateTab(tabname, navtab, from) {
     } else {
       prepareCountDimensions();
     }
+  } else if (tabname == 'search') {
+    search_index = prepareSearchIndex();
   }
 }
 
 
 function toggleChecked(id) {
-  //console.log(id);
   if (id == 'sortby-label') {
     document.getElementById('sortby-label').setAttribute('checked', true);
     document.getElementById('sortby-count').removeAttribute('checked');
@@ -79,6 +99,16 @@ function toggleChecked(id) {
     } else {
       //console.log('check ', id);
       document.getElementById(id).setAttribute('checked', true);
+    }
+  }
+}
+
+function resetSearch() {
+  document.getElementById('search-form').reset();
+  let checkboxes = document.getElementsByClassName('checkbox-search-dimensions-orientation');
+  for (var cb of checkboxes) {
+    if (cb.checked == false) {
+      toggleChecked(cb.id);
     }
   }
 }
@@ -141,8 +171,8 @@ function parseDimensions(dimstring) {
     dim = dim.replace(/^s+/, '').replace(/\s+$/);
     let h = dim.replace(/ *[xX].*$/, '');
     let w = dim.replace(/.*[xX] */, '').replace(/[^0-9]*$/, '');
-    h = h.replace(',', '.');
-    w = w.replace(',', '.');
+    h = parseFloat(h.replace(',', '.'));
+    w = parseFloat(w.replace(',', '.'));
     if (h > 100 || w > 100) {
       h = h/10;
       w = w/10;
@@ -316,5 +346,116 @@ function drawChart(name, type, xValues, yValues, barColors, title, chart_div_id)
       }
     }
   });
+
+}
+
+
+function prepareSearchIndex() {
+  let index = [];
+  for (var item of sources_dimensions_query['results']['bindings']) {
+    let dim = parseDimensions(item.d.value);
+    dim['id'] = item.s.value;
+    dim['date'] = item.date.value;
+    index.push(dim);
+  }
+  return index;
+}
+
+function searchIndex() {
+  //console.log(search_index);
+  let search_parameters = {};
+  search_parameters['h'] = parseFloat(document.getElementById('height-input').value);
+  search_parameters['w'] = parseFloat(document.getElementById('width-input').value);
+  search_parameters['accuracy'] = parseFloat(document.getElementById('accuracy-input').value);
+  if (isNaN(search_parameters['accuracy'])) {
+    search_parameters['accuracy'] = parseFloat(0);
+  }
+  search_parameters['orientation'] = [];
+  let orientation_checkboxes = document.getElementsByClassName('checkbox-search-dimensions-orientation');
+  for (var oc of orientation_checkboxes) {
+    if (oc.hasAttribute('checked')) {
+      search_parameters['orientation'].push(oc.getAttribute('value'));
+    }
+  }
+  search_parameters['uniformed'] = document.getElementById('search-uniformed').value;
+
+
+  let results = [];
+
+  for (var item of search_index) {
+    let addtolist = true;
+    if (search_parameters['uniformed'] != '') {
+      if (item.uniformed == search_parameters['uniformed']) {
+        addtolist = true;
+      } else {
+        addtolist = false;
+        continue;
+      }
+    }
+    if (search_parameters['orientation'].includes(item.orientation)) {
+      addtolist = true;
+    } else {
+      addtolist = false;
+      continue;
+    }
+    if (!isNaN(search_parameters['h'])) {
+      //console.log(item.h, search_parameters['h'] - search_parameters['accuracy']);
+      if (item.h == undefined) {
+        addtolist == false;
+        continue;
+      } else if (item.h >= search_parameters['h'] - search_parameters['accuracy'] &&
+                 item.h <= search_parameters['h'] + search_parameters['accuracy']) {
+        addtolist = true;
+      } else {
+        addtolist = false;
+        continue;
+      }
+    }
+    if (!isNaN(search_parameters['w'])) {
+      if (item.w >= search_parameters['w'] - search_parameters['accuracy'] &&
+          item.w <= search_parameters['w'] + search_parameters['accuracy']) {
+        addtolist = true;
+      } else {
+        addtolist = false;
+        continue;
+      }
+    }
+
+    if (addtolist == true) {
+      results.push(item);
+    }
+
+  }
+  console.log(search_parameters);
+  console.log(results);
+
+  if (isNaN(search_parameters['h']) &&
+      isNaN(search_parameters['w']) &&
+      search_parameters['accuracy'] == 0 &&
+      search_parameters['orientation'].length == 3 &&
+      search_parameters['uniformed'] == ''
+     ) {
+    console.log('clear search');
+    document.getElementById('result-list').innerHTML = "";
+    document.getElementById('search-result-count').innerHTML = "";
+  } else {
+    let result_counter = 1;
+    document.getElementById('search-result-count').innerHTML = "Number of search results: " + results.length;
+    document.getElementById('result-list').innerHTML = "";
+    let ol = document.createElement('ul');
+    ol.setAttribute('id', 'list-of-results');
+    for (var r of results) {
+      let li = document.createElement('li');
+      li.setAttribute('class', 'item');
+      li.innerHTML = result_counter + ". ";
+      let mya = document.createElement('a');
+      mya.setAttribute('href', r.id);
+      mya.innerHTML = r.id;
+      li.appendChild(mya);
+      ol.appendChild(li);
+      result_counter += 1;
+    }
+    document.getElementById('result-list').appendChild(ol);
+  }
 
 }

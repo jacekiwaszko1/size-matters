@@ -8,8 +8,36 @@ form.chartsettings-form {
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-
 }
+
+div.searchform-line {
+  max-width: 700px;
+  margin: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+button {
+  margin: 30px auto;
+  font-size: 18px;
+  text-transform: uppercase;
+  padding: 10px 30px;
+  font-weight: bold;
+  background-color: #e0c9a6;
+  /*-webkit-box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
+  -moz-box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
+  box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);*/
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #ffa986;
+}
+
 #menu {
   display: flex;
   flex-wrap: wrap;
@@ -18,12 +46,12 @@ form.chartsettings-form {
   font-size: 18px;
   text-transform: uppercase;
   -webkit-box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
--moz-box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
-box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
--webkit-border-radius: 5px;
--moz-border-radius: 5px;
-border-radius: 5px;
-background-color: #e0c9a6;
+  -moz-box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
+  box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  background-color: #e0c9a6;
 
 
 }
@@ -80,7 +108,7 @@ div.chartsettings {
   font-weight: bolder;
 }
 
-div.chart {
+div.chart, div.search-form-div {
   -webkit-box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
 -moz-box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
 box-shadow: 0px 0px 14px 0px rgba(0,0,0,0.75);
