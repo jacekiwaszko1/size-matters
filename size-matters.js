@@ -14,7 +14,7 @@ xhr.onload = () => {
     console.log(`Error: ${xhr.status}`);
   }
 };
-console.log(count_dimensions_json);
+//console.log(count_dimensions_json);
 //console.log(count_dimensions_json['results']['bindings'][0]['d']['value'], count_dimensions_json['results']['bindings'][0]['count']['value']);
 
 //get query for counting the dimiensions:
@@ -28,12 +28,12 @@ xhr_count_dimensions_query.onload = () => {
     const data = xhr_count_dimensions_query.response;
     console.log("data: ", data);
     count_dimensions_query = data;
-    //document.getElementById('count_dimensions_code').innerHTML = count_dimensions_query;
+    document.getElementById('count_dimensions_code').innerHTML = htmlSpecialChars(count_dimensions_query);
   } else {
     console.log(`Error: ${xhr_count_dimensions_query.status}`);
   }
 };
-console.log(count_dimensions_query);
+//console.log(count_dimensions_query);
 
 
 if ( window.history.replaceState ) {
@@ -41,7 +41,7 @@ if ( window.history.replaceState ) {
 }
 
 
-function activateTab(tabname, navtab) {
+function activateTab(tabname, navtab, from) {
   console.log(tabname);
   var tabs = document.getElementsByClassName('content-tab');
   for (var i = 0; i < tabs.length; i++) {
@@ -55,13 +55,17 @@ function activateTab(tabname, navtab) {
   tab.classList.remove('hidden');
 
   if (tabname == 'charts') {
-    prepareCountDimensions();
+    if (from == 'count_dimensions_settings') {
+      prepareCountDimensions(from);
+    } else {
+      prepareCountDimensions();
+    }
   }
 }
 
 
 function toggleChecked(id) {
-  console.log(id);
+  //console.log(id);
   if (id == 'sortby-label') {
     document.getElementById('sortby-label').setAttribute('checked', true);
     document.getElementById('sortby-count').removeAttribute('checked');
@@ -70,16 +74,100 @@ function toggleChecked(id) {
     document.getElementById('sortby-label').removeAttribute('checked');
   } else {
     if (document.getElementById(id).hasAttribute('checked')) {
-      console.log('uncheck ', id);
+      //console.log('uncheck ', id);
       document.getElementById(id).removeAttribute('checked');
     } else {
-      console.log('check ', id);
+      //console.log('check ', id);
       document.getElementById(id).setAttribute('checked', true);
     }
   }
 }
 
-function prepareCountDimensions() {
+function htmlSpecialChars(text) {
+    return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function parseDimensions(dimstring) {
+  let dimobj = {
+    'h': 0,
+    'w': 0,
+    'orientation': '',
+    'uniformed': ''
+  };
+
+  //remove all data in parenthesis
+  let repl = / *\([^)]*\)/g;
+  dimstring = dimstring.replace(repl, '');
+
+  //match all dimensions in string
+  let regex = /[0-9]+[,.]?[0-9]? ?[xX] ?[0-9]+[,.]?[0-9]? ?[cm]?m?/g;
+  let matched_dimensions = dimstring.match(regex);
+
+  //no actual dimensions find:
+  if (matched_dimensions == null) {
+    // generalized format information (in 4o, in 8o etc)
+    let nodim_orientation = 'unknown';
+    if (dimstring.match(/^in/) != null ) {
+      let uniformed = 'in-';
+      if (dimstring.match(/[0-9]+/) != null) {
+        uniformed += dimstring.match(/[0-9]+/)[0];
+      } else if (dimstring.match(/fol/) != null) {
+        uniformed += 'fol';
+      }
+      if (dimstring.match(/obl/) != null) {
+        uniformed += 'obl.';
+        nodim_orientation = 'landscape';
+      }
+      dimobj.h = undefined;
+      dimobj.w = undefined;
+      dimobj.orientation = nodim_orientation;
+      dimobj.uniformed = uniformed;
+    // no recognized dimension indication
+    } else {
+      dimobj.h = undefined;
+      dimobj.w = undefined;
+      dimobj.orientation = nodim_orientation;
+      dimobj.uniformed = dimstring.toLowerCase();
+    }
+  // found dimensions in expected format: h x w [unit], eg. 15,5 x 21 cm
+  } else {
+    // take only first of the dimensions
+    let dim = matched_dimensions[0];
+    dim = dim.replace(/^s+/, '').replace(/\s+$/);
+    let h = dim.replace(/ *[xX].*$/, '');
+    let w = dim.replace(/.*[xX] */, '').replace(/[^0-9]*$/, '');
+    h = h.replace(',', '.');
+    w = w.replace(',', '.');
+    if (h > 100 || w > 100) {
+      h = h/10;
+      w = w/10;
+    }
+    let orientation = '';
+    if (h > w) {
+      orientation = 'portrait';
+    } else if (w > h) {
+      orientation = 'landscape';
+    } else {
+      orientation = 'unknown';
+    }
+    uniformed = h + "x" + w;
+    dimobj.h = h;
+    dimobj.w = w;
+    dimobj.orientation = orientation;
+    dimobj.uniformed = uniformed;
+  }
+  //console.log(dimstring, dimobj);
+  return dimobj;
+}
+
+
+
+function prepareCountDimensions(from) {
   //console.log('drawing chars', count_dimensions_json);
   var xValues = [];
   var yValues = [];
@@ -89,86 +177,33 @@ function prepareCountDimensions() {
   for (var i = 0; i < count_dimensions_json['results']['bindings'].length; i++) {
     let bar = count_dimensions_json['results']['bindings'][i];
     xval = bar['d']['value'];
+
+    let dimobj = parseDimensions(xval);
+
     yval = parseInt(bar['count']['value']);
-    repl = / *\([^)]*\)/g;
-    xval = xval.replace(repl, '');
-    regex = /[0-9]+[,.]?[0-9]? ?[xX] ?[0-9]+[,.]?[0-9]? ?[cm]?m?/g;
-    xpos = xval.match(regex);
-    if (xpos == null) {
-      if (xval.match(/^in/) != null ) {
-        dim = 'in-';
-        if (xval.match(/[0-9]+/) != null) {
-          dim += xval.match(/[0-9]+/)[0];
-        } else if (xval.match(/fol/) != null) {
-          dim += 'fol';
-        }
-        if (xval.match(/obl/) != null) {
-          dim += 'obl.';
-        }
-        //console.log(dim);
-        if (dimensions[dim] == undefined) {
-          obj = {'count': yval, 'orientation': 'unknown'};
-          //dimensions[dim]['count'] = yval;
-          //dimensions[dim]['orientation'] = 'unknown';
-          dimensions[dim] = obj;
-        } else {
-          dimensions[dim]['count'] += yval;
-        }
-      } else {
-        //console.warn(xval);
-        if (dimensions[xval] == undefined) {
-          obj = {'count': yval, 'orientation': 'unknown'};
-          dimensions[xval] = obj;
-          //dimensions[xval]['count'] = yval;
-          //dimensions[xval]['orientation'] = 'unknown';
-        } else {
-          dimensions[xval]['count'] += yval;
-        }
-      }
-    } else {
 
-      dim = xpos[0];
-      dim = dim.replace(/^s+/, '').replace(/\s+$/);
-      h = dim.replace(/ *[xX].*$/, '');
-      w = dim.replace(/.*[xX] */, '').replace(/[^0-9]*$/, '');
-      h = h.replace(',', '.');
-      w = w.replace(',', '.');
-      if (h > 100 || w > 100) {
-        h = h/10;
-        w = w/10;
-      }
-      h = Math.round(h);
-      w = Math.round(w);
-      //console.log(h, w);
-      let orientation = '';
-      if (h > w) {
-        orientation = 'portrait';
-      } else if (w > h) {
-        orientation = 'landscape';
+    if (dimobj.h != undefined && dimobj.w != undefined) {
+      let round_h = Math.round(dimobj.h);
+      let round_w = Math.round(dimobj.w);
+      let label = round_h + "x" + round_w;
+      if (dimensions[label] == undefined) {
+        dimensions[label] = {'count': yval, 'orientation': dimobj.orientation};
       } else {
-        orientation = 'unknown';
+        dimensions[label]['count'] += yval;
       }
-
-      unidim = h + "x" + w;
-
-      if (dimensions[unidim] == undefined) {
-        obj = {'count': yval, 'orientation': orientation};
-        //dimensions[unidim]['count'] = yval;
-        //dimensions[unidim]['orientation'] = orientation;
-        dimensions[unidim] = obj;
+    } else if (dimobj.h == undefined || dimobj.w == undefined) {
+      //console.log(dimobj);
+      if (dimensions[dimobj.uniformed] == undefined) {
+        dimensions[dimobj.uniformed] = {'count': yval, 'orientation': dimobj.orientation};
       } else {
-        dimensions[unidim]['count'] += yval;
+        dimensions[dimobj.uniformed]['count'] += yval;
       }
     }
 
-
-    //if (yval > 2) {
-    //  xValues.push(xval);
-    //  yValues.push(yval);
-
-    //}
-
   }
+
+  //console.log(dimensions);
+
   colorcodes = {
     'portrait': 'forestgreen',
     'landscape': 'gold',
@@ -190,7 +225,7 @@ function prepareCountDimensions() {
     orientation_counter[listobj['orientation']] += listobj['count'];
     list.push(listobj);
   }
-  console.log(orientation_counter);
+  //console.log(orientation_counter);
   var orientation_xVals = [];
   var orientation_yVals = [];
   var orientation_colors = [];
@@ -202,7 +237,7 @@ function prepareCountDimensions() {
 
 
   let sortby;
-  console.log(document.getElementById('sortby-label').attributes);
+  //console.log(document.getElementById('sortby-label').attributes);
   if (document.getElementById('sortby-label').hasAttribute('checked')) {
     sortby = 'label';
   } else if (document.getElementById('sortby-count').hasAttribute('checked')) {
@@ -211,7 +246,7 @@ function prepareCountDimensions() {
     sortby = 'label';
   }
 
-  console.log(sortby);
+  //console.log(sortby);
 
   if (sortby == 'label') {
     list.sort((a,b) => (a.label > b.label) ? 1 : ((b.label > a.label) ? -1 : 0));
@@ -222,7 +257,7 @@ function prepareCountDimensions() {
   }
 
   let min_count = document.getElementById('min-count').value;
-  console.log("min_count: ", min_count);
+  //console.log("min_count: ", min_count);
 
   orientation_checkboxes = document.getElementsByClassName('checkbox-count-dimensions-orientation');
   orientations = [];
@@ -249,12 +284,12 @@ function prepareCountDimensions() {
   //barColors = "blue";
   document.getElementById('count-dimensions-counter').innerHTML = counter;
 
-  console.log(orientation_xVals, orientation_yVals, orientation_colors);
+  //console.log(orientation_xVals, orientation_yVals, orientation_colors);
 
   drawChart("count_dimensions_chart", "bar", xValues, yValues, barColors, "16th-century manuscripts and prints sizes", "chart-div");
-  drawChart("count_orientations_chart", "pie", orientation_xVals, orientation_yVals, orientation_colors, "Orientation counter", "piechart-div");
-
-
+  if (from != 'count_dimensions_settings') {
+    drawChart("count_orientations_chart", "pie", orientation_xVals, orientation_yVals, orientation_colors, "Orientation counter", "piechart-div");
+  }
 
 }
 

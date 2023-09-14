@@ -88,3 +88,11 @@ padding: 15px;
 margin: 15px;
 background-color: #eee;
 }
+
+code {
+  font-size: 18px;
+}
+
+pre {
+  background-color: #eee;
+}
