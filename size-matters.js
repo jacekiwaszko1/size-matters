@@ -52,6 +52,23 @@ xhr_sources_dimensions_query.onload = () => {
   }
 };
 
+//get query returning the index of sources with dimiensions:
+let source_dimensions_query;
+const xhr_source_dimensions_query = new XMLHttpRequest();
+xhr_source_dimensions_query.open("GET", "https://raw.githubusercontent.com/jacekiwaszko1/size-matters/main/sparql-queries/sources-with-dimensions.sparql");
+xhr_source_dimensions_query.send();
+xhr_source_dimensions_query.responseType = "text";
+xhr_source_dimensions_query.onload = () => {
+  if (xhr_source_dimensions_query.readyState == 4 && xhr_source_dimensions_query.status == 200) {
+    const data = xhr_source_dimensions_query.response;
+    //console.log("data: ", data);
+    source_dimensions_query = data;
+    document.getElementById('source_dimensions_code').innerHTML = htmlSpecialChars(source_dimensions_query);
+  } else {
+    console.log(`Error: ${xhr_source_dimensions_query.status}`);
+  }
+};
+//console.log(count_dimensions_query);
 
 
 if ( window.history.replaceState ) {
@@ -63,6 +80,7 @@ let search_index;
 function activateTab(tabname, navtab, from) {
   console.log(tabname);
   var tabs = document.getElementsByClassName('content-tab');
+  console.log(tabs);
   for (var i = 0; i < tabs.length; i++) {
     if (tabs[i].classList.contains('hidden')) {
 
@@ -92,6 +110,19 @@ function toggleChecked(id) {
   } else if (id == 'sortby-count') {
     document.getElementById('sortby-count').setAttribute('checked', true);
     document.getElementById('sortby-label').removeAttribute('checked');
+  } else if (id == 'search-sort-by-size') {
+    document.getElementById('search-sort-by-size').setAttribute('checked', true);
+    document.getElementById('search-sort-by-date').removeAttribute('checked');
+    document.getElementById('search-sort-by-orientation').removeAttribute('checked');
+  } else if (id == 'search-sort-by-date') {
+    document.getElementById('search-sort-by-date').setAttribute('checked', true);
+    document.getElementById('search-sort-by-size').removeAttribute('checked');
+    document.getElementById('search-sort-by-orientation').removeAttribute('checked');
+  } else if (id == 'search-sort-by-orientation') {
+    document.getElementById('search-sort-by-orientation').setAttribute('checked', true);
+    document.getElementById('search-sort-by-size').removeAttribute('checked');
+    document.getElementById('search-sort-by-date').removeAttribute('checked');
+
   } else {
     if (document.getElementById(id).hasAttribute('checked')) {
       //console.log('uncheck ', id);
@@ -196,7 +227,11 @@ function parseDimensions(dimstring) {
   return dimobj;
 }
 
-
+let colorcodes = {
+  'portrait': 'forestgreen',
+  'landscape': 'gold',
+  'unknown': 'grey'
+};
 
 function prepareCountDimensions(from) {
   //console.log('drawing chars', count_dimensions_json);
@@ -235,11 +270,8 @@ function prepareCountDimensions(from) {
 
   //console.log(dimensions);
 
-  colorcodes = {
-    'portrait': 'forestgreen',
-    'landscape': 'gold',
-    'unknown': 'grey'
-  };
+
+
   orientation_counter = {
     'portrait': 0,
     'landscape': 0,
@@ -379,7 +411,12 @@ function searchIndex() {
     }
   }
   search_parameters['uniformed'] = document.getElementById('search-uniformed').value;
-
+  let radio_sortby = document.getElementsByName('search-sort-by');
+  for (var radio of radio_sortby) {
+    if (radio.hasAttribute('checked')) {
+      search_parameters['sortby'] = radio.value;
+    }
+  }
 
   let results = [];
 
@@ -430,6 +467,18 @@ function searchIndex() {
   console.log(search_parameters);
   console.log(results);
 
+
+
+  if (search_parameters['sortby'] == 'size') {
+    results.sort((a,b) => (a.uniformed > b.uniformed) ? 1 : ((b.uniformed > a.uniformed) ? -1 : 0));
+  } else if (search_parameters['sortby'] == 'orientation') {
+    results.sort((a,b) => (a.orientation > b.orientation) ? 1 : ((b.orientation > a.orientation) ? -1 : 0));
+  } else if (search_parameters['sortby'] == 'date') {
+    results.sort((a,b) => (a.date > b.date) ? 1 : ((b.date > a.date) ? -1 : 0));
+  } else {
+    console.error('co jest z sortowaniem?');
+  }
+
   if (isNaN(search_parameters['h']) &&
       isNaN(search_parameters['w']) &&
       search_parameters['accuracy'] == 0 &&
@@ -442,18 +491,63 @@ function searchIndex() {
   } else {
     document.getElementById('search-result-count').innerHTML = "Number of search results: " + results.length;
     document.getElementById('result-list').innerHTML = "";
-    let ol = document.createElement('ul');
-    ol.setAttribute('id', 'list-of-results');
-    for (var r of results) {
-      let li = document.createElement('li');
-      li.setAttribute('class', 'item');
-      let mya = document.createElement('a');
-      mya.setAttribute('href', r.id);
-      mya.innerHTML = r.id;
-      li.appendChild(mya);
-      ol.appendChild(li);
+
+    //const xhr = new XMLHttpRequest();
+    //xhr.open("GET", r.id);
+    //xhr.send();
+    //xhr.responseType = "json";
+    //xhr.setRequestHeader('Accept', 'application/json+ld');
+    //xhr.onload = () => {
+    //  if (xhr.readyState == 4 && xhr.status == 200) {
+    //    const data = xhr.response;
+    //    console.log(data);
+    //    document.getElementById('count_dimensions').innerHTML = JSON.stringify(count_dimensions_json);
+    //  } else {
+    //    console.log(`Error: ${xhr.status}`);
+    //  }
+    //};
+    let result_counter = 1;
+    let evenodd = ['even', 'odd'];
+    let table = document.createElement('table');
+    table.setAttribute('id', 'list-of-results');
+    let head = document.createElement('tr');
+    head.setAttribute('class', 'header');
+    let columns = ['No.', 'Dimensions', 'Orientation', 'RISM ID', 'Date'];
+    for (var c of columns) {
+      let th = document.createElement('th');
+      th.innerHTML = c;
+      head.appendChild(th);
     }
-    document.getElementById('result-list').appendChild(ol);
+    table.appendChild(head);
+
+    for (var r of results) {
+      let tr = document.createElement('tr');
+      tr.setAttribute('class', evenodd[result_counter%2]);
+      let no = document.createElement('td');
+      no.setAttribute('onclick', "window.open(\'" + r.id + "\', \"_blank\")");
+      no.innerHTML = result_counter;
+      tr.appendChild(no);
+      let dim = document.createElement('td');
+      dim.setAttribute('onclick', "window.open(\'" + r.id + "\', \"_blank\")");
+      dim.innerHTML = r.uniformed;
+      tr.appendChild(dim);
+      let orient = document.createElement('td');
+      orient.setAttribute('class', colorcodes[r.orientation]);
+      orient.setAttribute('onclick', "window.open(\'" + r.id + "\', \"_blank\")");
+      orient.innerHTML = r.orientation;
+      tr.appendChild(orient);
+      let rism = document.createElement('td');
+      rism.setAttribute('onclick', "window.open(\'" + r.id + "\', \"_blank\")");
+      rism.innerHTML = r.id.replace(/.*\//, '');
+      tr.appendChild(rism);
+      let date = document.createElement('td');
+      date.setAttribute('onclick', "window.open(\'" + r.id + "\', \"_blank\")");
+      date.innerHTML = r.date;
+      tr.appendChild(date);
+      table.appendChild(tr);
+      result_counter += 1;
+    }
+    document.getElementById('result-list').appendChild(table);
   }
 
 }

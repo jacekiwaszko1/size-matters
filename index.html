@@ -18,8 +18,8 @@
       </div>
     </div>
     <div id="menu">
-    <div id="title" class="title">
-    <img id="logo" src="logo.svg" alt="" height="30px">
+    <div id="title" class="title"><a href="index.html">
+    <img id="logo" src="logo.svg" alt="" height="30px"></a>
   </div>
     <div class="navbar">
 
@@ -30,8 +30,22 @@
     </div>
   </div>
     <div class="content">
+      <div id="start" class="content-tab">
+        <div id="imgcontainer">
+
+          <img class="start" src="graphics.png" alt="">
+        </div>
+      </div>
       <div id="search" class="content-tab hidden">
         <h1>Search</h1>
+        <p>This search engine searches through the index of 16<sup>th</sup> century
+           manuscripts and prints, that was created with SPARQL query on RISM dataset
+           (<strong>QUERIES</strong> -> <strong>Get index of 16th sources with dimensions</strong>).
+           Search in actual dimensions (height or/and width) with given tolerance,
+           filter data based on orientation of the source, or search through standardized dimensions ([w]x[h] in centimeters, eg. 21.1x28).
+           Last search will also return generalized sized, eg. in-8, in-4obl. or in-fol.
+
+        </p>
         <div id="search-form-div" class="search-form-div">
           <h2>Specify search parameters:</h2>
           <form id="search-form" class="" action="" method="post" onchange="searchIndex()">
@@ -57,6 +71,15 @@
               <input type="text" id="search-uniformed" name="search-uniformed" value="" size="30" placeholder="eg. 15.4x20.7, in-8, in-4obl.">
             </div>
             <div class="searchform-line">
+              <p class="label">Sort by:</p>
+              <input type="radio" id="search-sort-by-size" name="search-sort-by" value="size" onchange="toggleChecked('search-sort-by-size')" checked>
+              <label for="search-sort-by-size">size (default)</label>
+              <input type="radio" id="search-sort-by-date" name="search-sort-by" value="date" onchange="toggleChecked('search-sort-by-date')">
+              <label for="search-sort-by-date">date</label>
+              <input type="radio" id="search-sort-by-orientation" name="search-sort-by" value="orientation" onchange="toggleChecked('search-sort-by-orientation')">
+              <label for="search-sort-by-orientation">orientation</label>
+            </div>
+            <div class="searchform-line">
               <button type='button' onclick="resetSearch()">Reset search parameters ⌫</button>
             </div>
           </form>
@@ -71,6 +94,11 @@
       </div>
       <div id="queries" class="content-tab hidden">
         <h1>Queries</h1>
+        <p>
+          Queries presented below are the exact SPARQL requests that were used to
+          get the data for search and generating charts. They are adjusted specifically
+          to the RDF dataset published by RISM Digital Center.
+        </p>
         <details id="count_dimensions_query">
           <summary>Query counting the occurances of particular dimensions</summary>
           <pre><code id="count_dimensions_code">
@@ -80,6 +108,16 @@ select * where {
 } limit 100
           </code></pre>
         </details>
+        <details id="sources_dimensions_query">
+          <summary>Get index of 16th sources with dimensions</summary>
+          <pre><code id="source_dimensions_code">
+@prefix
+select * where {
+  ?s ?p ?o .
+} limit 100
+          </code></pre>
+        </details>
+
       </div>
       <div id="charts" class="content-tab hidden">
         <h1>Charts</h1>
@@ -144,6 +182,14 @@ select * where {
       </div>
       <div id="about" class="content-tab hidden">
         <h1>About</h1>
+        <p>
+          <strong>SIZE MATTERS</strong> is a project focused on dimensions of 16<sup>th</sup>-century
+          music manuscripts and prints. As a data source it uses RISM RDF dataset, that can be searched through
+          with use of SPARQL query language. 
+        </p>
+        <p><strong>SIZE MATTERS</strong> is a micro research project
+          (STSM, Short Term Scientific Mission) within <a href="https://www.cost.eu/actions/CA21161/" target="_blank">Cost Action CA21161 -
+          A new ecosystem of early music studies (EarlyMuse).</a>Cost Action CA21161 - A new ecosystem of early music studies (EarlyMuse).</p>
       </div>
     </div>
   </body>

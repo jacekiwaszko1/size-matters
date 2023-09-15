@@ -60,11 +60,12 @@ button:hover {
   -ms-flex: 1;  /* IE 10 */
 }
 #title {
-  width: 137px;
+  min-width: 200px;
   background-color: #e0c9a6;
   flex: 0.3;
   font-weight: bold;
   padding: 25px 15px 15px;
+
 
 }
 
@@ -99,6 +100,21 @@ img.logo {
   margin-top: 20px;
 }
 
+.start {
+  display: block;
+  margin: auto;
+  max-width: 100%;
+  max-height: 100vh;
+
+
+}
+
+#imagecontainer {
+  display: grid;
+  height: 100%;
+  margin:auto;
+}
+
 .hidden {
   display: none;
 }
@@ -127,4 +143,61 @@ code {
 
 pre {
   background-color: #eee;
+  margin: 15px;
+  padding: 15px;
+}
+
+
+table {
+  font-size: 18px;
+  margin:5px auto 30px;
+  cursor:default;
+}
+
+th {
+  background-color: #e0c9a6;
+  padding: 10px 20px;
+  margin: 5px;
+}
+
+tr {
+  padding: 5px;
+}
+
+td {
+  padding: 10px 20px;
+}
+
+.even {
+  background-color: #eee;
+}
+
+tr:hover {
+  background-color: #b0a986;
+}
+
+.gold {
+  color: gold;
+}
+.forestgreen {
+  color: forestgreen;
+}
+.grey {
+  color: grey;
+}
+details {
+  margin:15px auto;
+}
+summary {
+  text-transform: uppercase;
+  font-size: 18px;
+  font-weight: bold;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+a {
+  font-weight: bold;
+  text-decoration: none;
+  color: #b0a986;
 }
