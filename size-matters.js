@@ -80,7 +80,6 @@ let search_index;
 function activateTab(tabname, navtab, from) {
   console.log(tabname);
   var tabs = document.getElementsByClassName('content-tab');
-  console.log(tabs);
   for (var i = 0; i < tabs.length; i++) {
     if (tabs[i].classList.contains('hidden')) {
 
@@ -492,20 +491,6 @@ function searchIndex() {
     document.getElementById('search-result-count').innerHTML = "Number of search results: " + results.length;
     document.getElementById('result-list').innerHTML = "";
 
-    //const xhr = new XMLHttpRequest();
-    //xhr.open("GET", r.id);
-    //xhr.send();
-    //xhr.responseType = "json";
-    //xhr.setRequestHeader('Accept', 'application/json+ld');
-    //xhr.onload = () => {
-    //  if (xhr.readyState == 4 && xhr.status == 200) {
-    //    const data = xhr.response;
-    //    console.log(data);
-    //    document.getElementById('count_dimensions').innerHTML = JSON.stringify(count_dimensions_json);
-    //  } else {
-    //    console.log(`Error: ${xhr.status}`);
-    //  }
-    //};
     let result_counter = 1;
     let evenodd = ['even', 'odd'];
     let table = document.createElement('table');
