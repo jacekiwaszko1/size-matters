@@ -238,4 +238,5 @@ a {
 
 div.content-tab {
 	margin-bottom: 90px;
+	min-height: 78vh;
 }
